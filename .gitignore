@@ -32,3 +32,17 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Linux system files
+*.swp
+*.swo
+*~
+.directory
+.Trash-*
+
+# SQLite DB files (if manually copied into project)
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
