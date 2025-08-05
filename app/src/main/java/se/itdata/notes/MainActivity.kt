@@ -8,23 +8,37 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import se.itdata.notes.database.AppDatabase
 import se.itdata.notes.database.Note
+import se.itdata.notes.ui.adapter.NotesAdapter
 import se.itdata.notes.viewmodel.NoteViewModel
 import se.itdata.notes.viewmodel.NoteViewModelFactory
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var notesAdapter: NotesAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewNotes)
+        recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 Columns
+
+        notesAdapter = NotesAdapter(emptyList())
+        recyclerView.adapter = notesAdapter
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
 
         // Get Dao from database instance
         val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
@@ -35,9 +49,15 @@ class MainActivity : AppCompatActivity() {
         // Initializes the ViewModel using the factory
         val noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]
 
+        noteViewModel.allNotes.observe(this) { notes ->
+            notesAdapter.submitList(notes)
+        }
 
-        //val testNote = Note(title="Testing Title", content = "This is a test noteer KEKEKEK") // Creation of notes
-        //noteViewModel.insert(testNote)
+        val testNote = Note(
+            title = "Jag gillar korv med bröd",
+            content = "Fan vad gott!"
+        ) // Creation of notes
+        noteViewModel.insert(testNote)
 
         // Note creation button
         val fabCreateNote = findViewById<FloatingActionButton>(R.id.fabCreateNote)
