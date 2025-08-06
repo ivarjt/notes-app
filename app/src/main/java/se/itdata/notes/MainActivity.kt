@@ -2,6 +2,7 @@ package se.itdata.notes
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
@@ -12,12 +13,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import se.itdata.notes.database.AppDatabase
-import se.itdata.notes.database.Note
 import se.itdata.notes.ui.adapter.NotesAdapter
 import se.itdata.notes.viewmodel.NoteViewModel
 import se.itdata.notes.viewmodel.NoteViewModelFactory
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
 
     private lateinit var notesAdapter: NotesAdapter
 
@@ -29,16 +29,14 @@ class MainActivity : AppCompatActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.recyclerViewNotes)
         recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 Columns
 
-        notesAdapter = NotesAdapter(emptyList())
+        notesAdapter = NotesAdapter(this, emptyList(), this)
         recyclerView.adapter = notesAdapter
-
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
 
         // Get Dao from database instance
         val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
@@ -53,11 +51,14 @@ class MainActivity : AppCompatActivity() {
             notesAdapter.submitList(notes)
         }
 
+        /*
         val testNote = Note(
-            title = "Jag gillar korv med bröd",
-            content = "Fan vad gott!"
+            title = "HejsanSvejsan",
+            content = "crazyt!"
         ) // Creation of notes
         noteViewModel.insert(testNote)
+        */
+
 
         // Note creation button
         val fabCreateNote = findViewById<FloatingActionButton>(R.id.fabCreateNote)
@@ -70,8 +71,13 @@ class MainActivity : AppCompatActivity() {
                 fabCreateNote.transitionName
             )
             startActivity(intent, options.toBundle())
-
         }
+    }
 
+    // Called when a note item is clicked, position is which note was clicked
+    override fun onNoteClick(position: Int) {
+        val clickedNote = notesAdapter.getNoteAt(position)
+
+        Toast.makeText(this, "Clicked: ${clickedNote.title}", Toast.LENGTH_SHORT).show()
     }
 }

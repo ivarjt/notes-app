@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
 
+//TODO: Remove this shit at some point
 object AlertUtil {
 
     // Creates a simple alert dialog, mostly used for debugging
