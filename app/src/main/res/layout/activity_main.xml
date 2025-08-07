@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:src="@drawable/doutline_chess_knight_24"
-        android:transitionName="shared_element_note" />
+        android:src="@drawable/outline_add_2_24"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

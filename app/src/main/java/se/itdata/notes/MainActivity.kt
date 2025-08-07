@@ -51,24 +51,13 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
         noteViewModel.allNotes.observe(this) { notes ->
             notesAdapter.submitList(notes)
         }
-/*
-        val testNote1 = Note(
-            title = "Note1",
-            content = "crazyt!"
-        ) // Creation of notes
-        noteViewModel.insert(testNote1)
-*/
 
         // Note creation button TODO: Expandable fab
         val fabCreateNote = findViewById<FloatingActionButton>(R.id.fabCreateNote)
         fabCreateNote.setOnClickListener {
             //AlertUtil.DebugAlert(this, "Title", "Message")
             val intent = Intent(this, NoteEditorActivity::class.java)
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                this,
-                fabCreateNote,
-                fabCreateNote.transitionName
-            )
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
             startActivity(intent, options.toBundle())
         }
     }

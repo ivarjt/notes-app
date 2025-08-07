@@ -17,7 +17,7 @@
         android:layout_marginTop="90dp"
         android:ems="10"
         android:inputType="text"
-        android:text="Title"
+        android:hint="Title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,7 +29,7 @@
         android:layout_marginTop="170dp"
         android:ems="10"
         android:inputType="text"
-        android:text="Content"
+        android:hint="content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
