@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import se.itdata.notes.database.AppDatabase
+import se.itdata.notes.database.Note
 import se.itdata.notes.ui.adapter.NotesAdapter
 import se.itdata.notes.viewmodel.NoteViewModel
 import se.itdata.notes.viewmodel.NoteViewModelFactory
@@ -50,17 +51,15 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
         noteViewModel.allNotes.observe(this) { notes ->
             notesAdapter.submitList(notes)
         }
-
-        /*
-        val testNote = Note(
-            title = "HejsanSvejsan",
+/*
+        val testNote1 = Note(
+            title = "Note1",
             content = "crazyt!"
         ) // Creation of notes
-        noteViewModel.insert(testNote)
-        */
+        noteViewModel.insert(testNote1)
+*/
 
-
-        // Note creation button
+        // Note creation button TODO: Expandable fab
         val fabCreateNote = findViewById<FloatingActionButton>(R.id.fabCreateNote)
         fabCreateNote.setOnClickListener {
             //AlertUtil.DebugAlert(this, "Title", "Message")

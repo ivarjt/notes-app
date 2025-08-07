@@ -1,0 +1,9 @@
+Note Creator Activity
+Edit Notes (By clicking the note)
+Database backup
+Tasks (Change fab to expandable)
+Delete Notes
+
+Animations & UI (implement a good looking theme)
+Change fab logo
+Icon Logo
