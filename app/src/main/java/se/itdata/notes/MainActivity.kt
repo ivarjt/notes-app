@@ -55,8 +55,10 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
         // Note creation button TODO: Expandable fab
         val fabCreateNote = findViewById<FloatingActionButton>(R.id.fabCreateNote)
         fabCreateNote.setOnClickListener {
-            //AlertUtil.DebugAlert(this, "Title", "Message")
-            val intent = Intent(this, NoteEditorActivity::class.java)
+            val intent = Intent(this, NoteEditorActivity::class.java).apply {
+                intent.putExtra(NoteEditorActivity.EXTRA_MODE, "create")
+            }
+
             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
             startActivity(intent, options.toBundle())
         }
@@ -66,6 +68,12 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
     override fun onNoteClick(position: Int) {
         val clickedNote = notesAdapter.getNoteAt(position)
 
-        Toast.makeText(this, "Clicked: ${clickedNote.title}", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, NoteEditorActivity::class.java).apply {
+            putExtra(NoteEditorActivity.EXTRA_MODE, "edit")
+            putExtra(NoteEditorActivity.EXTRA_NOTE_ID, clickedNote.id)
+        }
+        
+        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
+        startActivity(intent, options.toBundle())
     }
 }

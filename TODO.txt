@@ -1,9 +1,10 @@
-Note Creator Activity
-Edit Notes (By clicking the note)
+
+Delete Notes
 Database backup
 Tasks (Change fab to expandable)
-Delete Notes
+Make the android back button also save the note (somehow make it do the same thing as the "back button in editor view)
 
+Splash Screen
 Animations & UI (implement a good looking theme)
 Change fab logo
 Icon Logo

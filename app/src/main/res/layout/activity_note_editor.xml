@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     tools:context=".NoteEditorActivity">
-    <include layout="@layout/note_creator_toolbar"/>
+    <include layout="@layout/note_editor_toolbar"/>
 
 
     <EditText

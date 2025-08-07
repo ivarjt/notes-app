@@ -16,4 +16,14 @@ class NoteViewModel(private val noteDao: NoteDao) : ViewModel() {
         }
     }
 
+    fun update(note: Note) {
+        viewModelScope.launch {
+            noteDao.update(note)
+        }
+    }
+
+    fun getNoteById(id: Int): LiveData<Note> {
+        return noteDao.getNoteById(id)
+    }
+
 }
