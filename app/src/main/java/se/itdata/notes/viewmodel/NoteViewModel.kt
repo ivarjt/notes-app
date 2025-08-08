@@ -22,6 +22,12 @@ class NoteViewModel(private val noteDao: NoteDao) : ViewModel() {
         }
     }
 
+    fun delete(note: Note) {
+        viewModelScope.launch {
+            noteDao.delete(note)
+        }
+    }
+
     fun getNoteById(id: Int): LiveData<Note> {
         return noteDao.getNoteById(id)
     }

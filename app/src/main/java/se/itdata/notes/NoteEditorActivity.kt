@@ -72,6 +72,18 @@ class NoteEditorActivity : ComponentActivity() {
             startActivity(intentMain, options.toBundle())
         }
 
+        val deleteButton: ImageView = findViewById(R.id.trash_bin)
+        deleteButton.setOnClickListener {
+            if (mode == "edit" && noteId != -1) {
+                noteViewModel.getNoteById(noteId).observe(this) {note ->
+                    if (note != null) {
+                        noteViewModel.delete(note)
+                        startActivity(intentMain, options.toBundle())
+                    }
+                }
+            }
+        }
+
     }
 
 }

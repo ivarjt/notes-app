@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
             putExtra(NoteEditorActivity.EXTRA_MODE, "edit")
             putExtra(NoteEditorActivity.EXTRA_NOTE_ID, clickedNote.id)
         }
-        
+
         val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
         startActivity(intent, options.toBundle())
     }

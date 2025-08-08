@@ -16,8 +16,16 @@
             android:id="@+id/arrow_back"
             android:layout_centerVertical="true"
             android:src="@drawable/baseline_arrow_back_24"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/trash_bin"
+            android:layout_centerVertical="true"
+            android:src="@drawable/outline_auto_delete_24"
+            android:layout_alignParentEnd="true"/> <!-- TODO:  only show in edit mode -->
         
-        <!-- TODO: Add buttons for pinned, reminder, delete-->
+        <!-- TODO: Add buttons for pinned, reminder-->
 
     </RelativeLayout>
 
