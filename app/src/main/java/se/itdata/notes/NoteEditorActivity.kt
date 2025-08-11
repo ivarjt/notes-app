@@ -32,9 +32,18 @@ class NoteEditorActivity : ComponentActivity() {
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.note_creator)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomPadding = maxOf(systemBars.bottom, imeInsets.bottom)
+
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                bottomPadding
+            )
             insets
         }
+
 
         val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
         val factory = NoteViewModelFactory(noteDao)                                                 // Creates ViewModel factory passing the Dao
