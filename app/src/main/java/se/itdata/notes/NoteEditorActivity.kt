@@ -1,7 +1,9 @@
 package se.itdata.notes
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
@@ -9,7 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import se.itdata.notes.database.AppDatabase
 import se.itdata.notes.database.Note
 import se.itdata.notes.viewmodel.NoteViewModel
@@ -30,6 +35,24 @@ class NoteEditorActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_note_editor)
 
+        val container = findViewById<View>(R.id.note_creator)
+        ViewCompat.setTransitionName(container, intent.getStringExtra("transitionName") ?: "shared_element_container")
+
+        setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementEnterTransition = MaterialContainerTransform().apply {
+            addTarget(R.id.note_creator)
+            duration = 300L
+            scrimColor = Color.TRANSPARENT
+            interpolator = FastOutSlowInInterpolator()
+        }
+
+        window.sharedElementReturnTransition = MaterialContainerTransform().apply {
+            addTarget(R.id.note_creator)
+            duration = 250L
+            scrimColor = Color.TRANSPARENT
+            interpolator = FastOutSlowInInterpolator()
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.note_creator)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -43,7 +66,6 @@ class NoteEditorActivity : ComponentActivity() {
             )
             insets
         }
-
 
         val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
         val factory = NoteViewModelFactory(noteDao)                                                 // Creates ViewModel factory passing the Dao
@@ -92,7 +114,5 @@ class NoteEditorActivity : ComponentActivity() {
                 }
             }
         }
-
     }
-
 }

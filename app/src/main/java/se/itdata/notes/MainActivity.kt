@@ -2,7 +2,6 @@ package se.itdata.notes
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import se.itdata.notes.database.AppDatabase
-import se.itdata.notes.database.Note
 import se.itdata.notes.ui.adapter.NotesAdapter
 import se.itdata.notes.viewmodel.NoteViewModel
 import se.itdata.notes.viewmodel.NoteViewModelFactory
@@ -21,17 +19,19 @@ import se.itdata.notes.viewmodel.NoteViewModelFactory
 class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
 
     private lateinit var notesAdapter: NotesAdapter
+    private lateinit var recyclerViewNotes: RecyclerView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerViewNotes)
-        recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 Columns
+        recyclerViewNotes = findViewById(R.id.recyclerViewNotes)
+        recyclerViewNotes.layoutManager = GridLayoutManager(this, 2)
 
         notesAdapter = NotesAdapter(this, emptyList(), this)
-        recyclerView.adapter = notesAdapter
+        recyclerViewNotes.adapter = notesAdapter
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -39,14 +39,9 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
             insets
         }
 
-        // Get Dao from database instance
-        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
-
-        // Creates ViewModel factory passing the Dao
-        val factory = NoteViewModelFactory(noteDao)
-
-        // Initializes the ViewModel using the factory
-        val noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]
+        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
+        val factory = NoteViewModelFactory(noteDao)                                                 // Creates ViewModel factory passing the Dao
+        val noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]     // Initializes the ViewModel using the factory
 
         noteViewModel.allNotes.observe(this) { notes ->
             notesAdapter.submitList(notes)
@@ -58,22 +53,39 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
             val intent = Intent(this, NoteEditorActivity::class.java).apply {
                 intent.putExtra(NoteEditorActivity.EXTRA_MODE, "create")
             }
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                this,
+                fabCreateNote,
+                ViewCompat.getTransitionName(fabCreateNote) ?: "shared_element_container"
+            )
 
-            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
             startActivity(intent, options.toBundle())
         }
     }
 
-    // Called when a note item is clicked, position is which note was clicked
+    // Called when a note item is clicked, position is what note was clicked
     override fun onNoteClick(position: Int) {
         val clickedNote = notesAdapter.getNoteAt(position)
+        val noteView = recyclerViewNotes.findViewHolderForAdapterPosition(position)?.itemView
 
         val intent = Intent(this, NoteEditorActivity::class.java).apply {
             putExtra(NoteEditorActivity.EXTRA_MODE, "edit")
             putExtra(NoteEditorActivity.EXTRA_NOTE_ID, clickedNote.id)
+            putExtra("transitionName", "note_${clickedNote.id}")  // Pass the transition name for the target activity
         }
 
-        val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
-        startActivity(intent, options.toBundle())
+        if (noteView != null) {
+            val transitionName = ViewCompat.getTransitionName(noteView) ?: "note_${clickedNote.id}"
+
+            val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                this,
+                noteView,
+                transitionName
+            )
+            startActivity(intent, options.toBundle())
+        } else {
+            // Fallback if view is null
+            startActivity(intent)
+        }
     }
 }

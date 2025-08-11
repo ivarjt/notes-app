@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import se.itdata.notes.R
 import se.itdata.notes.database.Note
@@ -39,6 +40,8 @@ class NotesAdapter(private val context: Context,
         val note = dataSet[position]
         holder.titleView.text = note.title
         holder.contentView.text = note.content
+
+        ViewCompat.setTransitionName(holder.itemView, "note_${note.id}")
     }
 
     override fun getItemCount(): Int = dataSet.size
