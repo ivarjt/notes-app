@@ -26,5 +26,7 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE id = :id")
     fun getNoteById(id: Int): LiveData<Note>
 
-    //TODO: Delete note, Edit Note
+    @Query("UPDATE notes SET pinned = NOT pinned WHERE id = :id")
+    suspend fun togglePinned(id: Int)
+
 }

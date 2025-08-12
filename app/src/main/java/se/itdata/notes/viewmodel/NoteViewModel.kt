@@ -32,4 +32,10 @@ class NoteViewModel(private val noteDao: NoteDao) : ViewModel() {
         return noteDao.getNoteById(id)
     }
 
+    fun togglePinned(id: Int) {
+        viewModelScope.launch {
+            noteDao.togglePinned(id)
+        }
+    }
+
 }

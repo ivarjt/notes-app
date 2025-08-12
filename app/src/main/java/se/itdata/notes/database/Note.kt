@@ -8,4 +8,5 @@ data class Note(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
     val content: String,
+    val pinned: Boolean = false // true if pinned, false if not pinned
 )

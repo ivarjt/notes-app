@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -30,6 +29,10 @@ class NoteEditorActivity : ComponentActivity() {
     private lateinit var noteViewModel: NoteViewModel
     private var mode: String? = null
     private var noteId: Int = -1
+
+    private lateinit var pinToggleButton: ImageView
+    private var currentNote: Note? = null
+    private var isPinnedLocal = false
 
     companion object {
         const val EXTRA_MODE = "mode" // "edit" or "create"
@@ -73,25 +76,30 @@ class NoteEditorActivity : ComponentActivity() {
             insets
         }
 
-        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
-        val factory = NoteViewModelFactory(noteDao)                                                 // Creates ViewModel factory passing the Dao
-        noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]     // Initializes the ViewModel using the factory
+        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
+        val factory = NoteViewModelFactory(noteDao)
+        noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]
 
         titleInput = findViewById(R.id.titleInput)
         contentInput = findViewById(R.id.contentInput)
         val backButton: ImageView = findViewById(R.id.arrow_back)
+        val deleteButton: ImageView = findViewById(R.id.trash_bin)
+        pinToggleButton = findViewById(R.id.buttonPinToggle)
 
         mode = intent.getStringExtra(EXTRA_MODE)
         noteId = intent.getIntExtra(EXTRA_NOTE_ID, -1)
 
         if (mode == "edit" && noteId != -1) {
-            noteViewModel.getNoteById(noteId).observe(this) {note ->
+            noteViewModel.getNoteById(noteId).observe(this) { note ->
                 if (note != null) {
+                    currentNote = note
                     titleInput.setText(note.title)
                     contentInput.setText(note.content)
+                    updatePinIcon(note.pinned)
                 }
             }
         }
+
         val intentMain = Intent(this, MainActivity::class.java)
         val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this)
 
@@ -108,12 +116,30 @@ class NoteEditorActivity : ComponentActivity() {
             }
         })
 
-        val deleteButton: ImageView = findViewById(R.id.trash_bin)
         deleteButton.setOnClickListener {
             deleteNote()
             startActivity(intentMain, options.toBundle())
         }
 
+        pinToggleButton.setOnClickListener {
+            if (mode == "edit" && currentNote != null) {
+                // Editing existing note → update DB immediately
+                noteViewModel.togglePinned(currentNote!!.id)
+            } else {
+                // Creating new note → just toggle local variable
+                isPinnedLocal = !isPinnedLocal
+                updatePinIcon(isPinnedLocal)
+            }
+        }
+
+    }
+
+    private fun updatePinIcon(isPinned: Boolean) {
+        if (isPinned) {
+            pinToggleButton.setImageResource(R.drawable.keep_filled)
+        } else {
+            pinToggleButton.setImageResource(R.drawable.keep_outline)
+        }
     }
 
     private fun saveNote() {
@@ -121,23 +147,29 @@ class NoteEditorActivity : ComponentActivity() {
         val currentContent = contentInput.text.toString()
 
         if (currentTitle.isBlank() && currentContent.isBlank()) {
-            // Don't save note if blank
             return
         } else {
-            // Save note if note contains data
-         if (mode == "edit" && noteId != -1) {
-             val updatedNote = Note(id = noteId, title = currentTitle, content = currentContent)
-             noteViewModel.update(updatedNote)
-         } else {
-             val newNote = Note(title = currentTitle, content = currentContent)
-             noteViewModel.insert(newNote)
-         }
+            if (mode == "edit" && noteId != -1) {
+                val updatedNote = currentNote?.copy(
+                    title = currentTitle,
+                    content = currentContent
+                ) ?: Note(id = noteId, title = currentTitle, content = currentContent)
+                noteViewModel.update(updatedNote)
+            } else {
+                val newNote = Note(
+                    title = currentTitle,
+                    content = currentContent,
+                    pinned = isPinnedLocal // store pinned state
+                )
+                noteViewModel.insert(newNote)
+            }
         }
     }
 
+
     private fun deleteNote() {
         if (mode == "edit" && noteId != -1) {
-            noteViewModel.getNoteById(noteId).observe(this) {note ->
+            noteViewModel.getNoteById(noteId).observe(this) { note ->
                 if (note != null) {
                     noteViewModel.delete(note)
                 }

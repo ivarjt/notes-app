@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
 
     private lateinit var notesAdapter: NotesAdapter
     private lateinit var recyclerViewNotes: RecyclerView
+    private lateinit var noteViewModel: NoteViewModel
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
 
         val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
         val factory = NoteViewModelFactory(noteDao)                                                 // Creates ViewModel factory passing the Dao
-        val noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]     // Initializes the ViewModel using the factory
+        noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]     // Initializes the ViewModel using the factory
 
         noteViewModel.allNotes.observe(this) { notes ->
             notesAdapter.submitList(notes)
@@ -88,4 +89,10 @@ class MainActivity : AppCompatActivity(), NotesAdapter.RecyclerViewEvent {
             startActivity(intent)
         }
     }
+
+    override fun onTogglePinned(position: Int) {
+        val clickedNote = notesAdapter.getNoteAt(position)
+        noteViewModel.togglePinned(clickedNote.id)
+    }
+
 }

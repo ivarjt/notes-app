@@ -58,6 +58,7 @@ class NotesAdapter(private val context: Context,
 
     interface RecyclerViewEvent {
         fun onNoteClick(position: Int)
+        fun onTogglePinned(position: Int)
     }
 
 }
