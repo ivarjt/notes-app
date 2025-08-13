@@ -1,10 +1,9 @@
+<!-- themes.xml -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.Notes" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowActivityTransitions">true</item>
-        <!-- Add your other theme customizations here -->
-
+        <item name="colorPrimary">@color/colorPrimary</item>
     </style>
 
     <style name="Theme.Notes" parent="Base.Theme.Notes" />

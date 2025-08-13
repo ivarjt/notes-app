@@ -6,9 +6,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
-import androidx.activity.ComponentActivity
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,10 +19,11 @@ import com.google.android.material.transition.platform.MaterialContainerTransfor
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import se.itdata.notes.database.AppDatabase
 import se.itdata.notes.database.Note
+import se.itdata.notes.ui.bottomsheet.BottomSheetDialog
 import se.itdata.notes.viewmodel.NoteViewModel
 import se.itdata.notes.viewmodel.NoteViewModelFactory
 
-class NoteEditorActivity : ComponentActivity() {
+class NoteEditorActivity : AppCompatActivity() {
 
     lateinit var titleInput: EditText
     lateinit var contentInput: EditText
@@ -85,6 +87,7 @@ class NoteEditorActivity : ComponentActivity() {
         val backButton: ImageView = findViewById(R.id.arrow_back)
         val deleteButton: ImageView = findViewById(R.id.trash_bin)
         pinToggleButton = findViewById(R.id.buttonPinToggle)
+        val reminderButton: ImageView = findViewById(R.id.reminder)
 
         mode = intent.getStringExtra(EXTRA_MODE)
         noteId = intent.getIntExtra(EXTRA_NOTE_ID, -1)
@@ -119,6 +122,12 @@ class NoteEditorActivity : ComponentActivity() {
         deleteButton.setOnClickListener {
             deleteNote()
             startActivity(intentMain, options.toBundle())
+        }
+
+        reminderButton.setOnClickListener {
+            //Toast.makeText(this, "Reminder Clicked", Toast.LENGTH_SHORT).show()
+            val bottomSheet = BottomSheetDialog()
+            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
 
         pinToggleButton.setOnClickListener {
@@ -165,7 +174,6 @@ class NoteEditorActivity : ComponentActivity() {
             }
         }
     }
-
 
     private fun deleteNote() {
         if (mode == "edit" && noteId != -1) {
