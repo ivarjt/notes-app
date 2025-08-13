@@ -12,7 +12,7 @@ import androidx.room.Update
 interface NoteDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(note: Note)
+    suspend fun insert(note: Note): Long
 
     @Update
     suspend fun update(note: Note)
@@ -28,5 +28,11 @@ interface NoteDao {
 
     @Query("UPDATE notes SET pinned = NOT pinned WHERE id = :id")
     suspend fun togglePinned(id: Int)
+
+    @Query("UPDATE notes SET reminderTime = :time WHERE id = :id")
+    suspend fun setReminder(id: Int, time: Long?)
+
+    @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL AND reminderTime > :currentTime")
+    fun getUpcomingReminders(currentTime: Long): List<Note>
 
 }

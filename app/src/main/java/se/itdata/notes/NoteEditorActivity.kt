@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -35,9 +34,10 @@ class NoteEditorActivity : AppCompatActivity() {
     private lateinit var pinToggleButton: ImageView
     private var currentNote: Note? = null
     private var isPinnedLocal = false
+    private var pendingReminderTime: Long? = null // For create mode
 
     companion object {
-        const val EXTRA_MODE = "mode" // "edit" or "create"
+        const val EXTRA_MODE = "mode"
         const val EXTRA_NOTE_ID = "note_id"
     }
 
@@ -47,7 +47,10 @@ class NoteEditorActivity : AppCompatActivity() {
         setContentView(R.layout.activity_note_editor)
 
         val container = findViewById<View>(R.id.note_creator)
-        ViewCompat.setTransitionName(container, intent.getStringExtra("transitionName") ?: "shared_element_container")
+        ViewCompat.setTransitionName(
+            container,
+            intent.getStringExtra("transitionName") ?: "shared_element_container"
+        )
 
         setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
         window.sharedElementEnterTransition = MaterialContainerTransform().apply {
@@ -69,12 +72,7 @@ class NoteEditorActivity : AppCompatActivity() {
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             val bottomPadding = maxOf(systemBars.bottom, imeInsets.bottom)
 
-            v.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                bottomPadding
-            )
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, bottomPadding)
             insets
         }
 
@@ -124,23 +122,33 @@ class NoteEditorActivity : AppCompatActivity() {
             startActivity(intentMain, options.toBundle())
         }
 
+        // Listen for reminder time from BottomSheet in create mode
+        supportFragmentManager.setFragmentResultListener("reminderRequestKey", this) { _, bundle ->
+            pendingReminderTime = bundle.getLong("reminderTime")
+        }
+
         reminderButton.setOnClickListener {
-            //Toast.makeText(this, "Reminder Clicked", Toast.LENGTH_SHORT).show()
             val bottomSheet = BottomSheetDialog()
+            val args = Bundle()
+
+            if (mode == "edit" && noteId != -1) {
+                args.putInt("noteId", noteId)
+            } else {
+                args.putInt("noteId", -1) // create mode
+            }
+
+            bottomSheet.arguments = args
             bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
 
         pinToggleButton.setOnClickListener {
             if (mode == "edit" && currentNote != null) {
-                // Editing existing note → update DB immediately
                 noteViewModel.togglePinned(currentNote!!.id)
             } else {
-                // Creating new note → just toggle local variable
                 isPinnedLocal = !isPinnedLocal
                 updatePinIcon(isPinnedLocal)
             }
         }
-
     }
 
     private fun updatePinIcon(isPinned: Boolean) {
@@ -157,21 +165,22 @@ class NoteEditorActivity : AppCompatActivity() {
 
         if (currentTitle.isBlank() && currentContent.isBlank()) {
             return
+        }
+
+        if (mode == "edit" && noteId != -1) {
+            val updatedNote = currentNote?.copy(
+                title = currentTitle,
+                content = currentContent
+            ) ?: Note(id = noteId, title = currentTitle, content = currentContent)
+            noteViewModel.update(updatedNote)
         } else {
-            if (mode == "edit" && noteId != -1) {
-                val updatedNote = currentNote?.copy(
-                    title = currentTitle,
-                    content = currentContent
-                ) ?: Note(id = noteId, title = currentTitle, content = currentContent)
-                noteViewModel.update(updatedNote)
-            } else {
-                val newNote = Note(
-                    title = currentTitle,
-                    content = currentContent,
-                    pinned = isPinnedLocal // store pinned state
-                )
-                noteViewModel.insert(newNote)
-            }
+            val newNote = Note(
+                title = currentTitle,
+                content = currentContent,
+                pinned = isPinnedLocal,
+                reminderTime = pendingReminderTime // only set if chosen
+            )
+            noteViewModel.insert(newNote)
         }
     }
 
@@ -184,5 +193,4 @@ class NoteEditorActivity : AppCompatActivity() {
             }
         }
     }
-
 }

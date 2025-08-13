@@ -38,4 +38,19 @@ class NoteViewModel(private val noteDao: NoteDao) : ViewModel() {
         }
     }
 
+    fun setReminder(noteId: Int, time: Long?) {
+        viewModelScope.launch {
+            noteDao.setReminder(noteId, time)
+        }
+    }
+
+    fun insertNoteWithReminder(note: Note, reminderTime: Long?) {
+        viewModelScope.launch {
+            val id = noteDao.insert(note)
+            reminderTime?.let {
+                noteDao.setReminder(id.toInt(), it)
+            }
+        }
+    }
+
 }
