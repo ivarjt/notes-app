@@ -71,14 +71,13 @@ class NoteEditorActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             val bottomPadding = maxOf(systemBars.bottom, imeInsets.bottom)
-
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, bottomPadding)
             insets
         }
 
-        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()
-        val factory = NoteViewModelFactory(noteDao)
-        noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]
+        val noteDao = AppDatabase.getDatabase(applicationContext).noteDao()                         // Get Dao from database instance
+        val factory = NoteViewModelFactory(noteDao, applicationContext)                             // Creates ViewModel factory passing the Dao
+        noteViewModel = ViewModelProvider(this, factory)[NoteViewModel::class.java]         // Initializes the ViewModel using the factory
 
         titleInput = findViewById(R.id.titleInput)
         contentInput = findViewById(R.id.contentInput)
@@ -130,13 +129,7 @@ class NoteEditorActivity : AppCompatActivity() {
         reminderButton.setOnClickListener {
             val bottomSheet = BottomSheetDialog()
             val args = Bundle()
-
-            if (mode == "edit" && noteId != -1) {
-                args.putInt("noteId", noteId)
-            } else {
-                args.putInt("noteId", -1) // create mode
-            }
-
+            args.putInt("noteId", if (mode == "edit") noteId else -1)
             bottomSheet.arguments = args
             bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
@@ -152,45 +145,31 @@ class NoteEditorActivity : AppCompatActivity() {
     }
 
     private fun updatePinIcon(isPinned: Boolean) {
-        if (isPinned) {
-            pinToggleButton.setImageResource(R.drawable.keep_filled)
-        } else {
-            pinToggleButton.setImageResource(R.drawable.keep_outline)
-        }
+        pinToggleButton.setImageResource(
+            if (isPinned) R.drawable.keep_filled else R.drawable.keep_outline
+        )
     }
 
     private fun saveNote() {
         val currentTitle = titleInput.text.toString()
         val currentContent = contentInput.text.toString()
-
-        if (currentTitle.isBlank() && currentContent.isBlank()) {
-            return
-        }
+        if (currentTitle.isBlank() && currentContent.isBlank()) return
 
         if (mode == "edit" && noteId != -1) {
-            val updatedNote = currentNote?.copy(
-                title = currentTitle,
-                content = currentContent
-            ) ?: Note(id = noteId, title = currentTitle, content = currentContent)
+            val updatedNote = currentNote?.copy(title = currentTitle, content = currentContent)
+                ?: Note(id = noteId, title = currentTitle, content = currentContent)
             noteViewModel.update(updatedNote)
+            pendingReminderTime?.let { noteViewModel.setReminder(noteId, it) }
         } else {
-            val newNote = Note(
-                title = currentTitle,
-                content = currentContent,
-                pinned = isPinnedLocal,
-                reminderTime = pendingReminderTime // only set if chosen
-            )
-            noteViewModel.insert(newNote)
+            val newNote = Note(title = currentTitle, content = currentContent, pinned = isPinnedLocal)
+            noteViewModel.insertNoteWithReminder(newNote, pendingReminderTime)
         }
     }
 
     private fun deleteNote() {
         if (mode == "edit" && noteId != -1) {
-            noteViewModel.getNoteById(noteId).observe(this) { note ->
-                if (note != null) {
-                    noteViewModel.delete(note)
-                }
-            }
+            currentNote?.let { noteViewModel.delete(it) }
         }
     }
+
 }
