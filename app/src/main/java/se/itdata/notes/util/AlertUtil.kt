@@ -4,10 +4,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.widget.Toast
 
+//TODO: Remove this shit at some point
 object AlertUtil {
 
     // Creates a simple alert dialog, mostly used for debugging
-    fun Alert(context: Context, title: String, message: String) {
+    fun DebugAlert(context: Context, title: String, message: String) {
         val builder = AlertDialog.Builder(context)
         builder.setTitle(title)
         builder.setMessage(message)
